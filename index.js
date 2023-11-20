@@ -1,6 +1,33 @@
 const express = require("express");
+var morgan = require("morgan");
 const app = express();
 app.use(express.json());
+
+morgan.token("request", function (req, res) { return req.method })
+morgan.token("data", function (req, res) { console.log(res) })
+
+/*morgan(function (tokens, req, res) {
+    return [
+      tokens.request(req, res),
+      tokens.url(req, res),
+      tokens.status(req, res),
+      tokens['response-time'](req, res), 'ms',
+      tokens.res(req, res, 'content-length'), '-'
+    ].join(' ')
+  })
+*/
+
+app.use(morgan(function (tokens, req, res) {
+    return [
+      tokens.request(req, res),
+      tokens.url(req, res),
+      tokens.status(req, res),
+      tokens.res(req, res, 'content-length'), "-",
+      tokens['response-time'](req, res), 'ms',
+      tokens.data(req, res)
+    ].join(' ');
+  }));
+
 
 let persons = [
     {
@@ -19,6 +46,7 @@ let persons = [
         number: "676767"
       }
 ]
+
 
 app.get("/", (req, res) => {
     res.send("<h1>HELLO</h1>");
