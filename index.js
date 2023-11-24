@@ -17,15 +17,30 @@ morgan.token("data", function (req, res) { console.log(res) })
   })
 */
 
+//Create a global contact and a function that returns a chosen parameter.
+let contact;
+
+function getContact(c) {
+    return c;
+}
+
 app.use(morgan(function (tokens, req, res) {
-    return [
-      tokens.request(req, res),
-      tokens.url(req, res),
-      tokens.status(req, res),
-      tokens.res(req, res, 'content-length'), "-",
-      tokens['response-time'](req, res), 'ms',
-      tokens.data(req, res)
-    ].join(' ');
+    let response = [
+        tokens.request(req, res),
+        tokens.url(req, res),
+        tokens.status(req, res),
+        tokens.res(req, res, 'content-length'), "-",
+        tokens['response-time'](req, res), 'ms',
+        tokens.data(req, res)
+      ].join(' ');
+
+      //If the request is POST, add contact to response
+      if(tokens.request(req, res) === "POST")
+      {
+        response = response.concat(JSON.stringify(contact));
+      }
+      
+      return response;
   }));
 
 
@@ -64,6 +79,7 @@ app.get("/api/persons/:id", (req, res) => {
     //If person exists, respond. Otherwise send a 404 error
     if(person) {
         res.json(person); 
+        res.on("finish", () => contact=person)
     }
     else {
         res.status(404).end();
@@ -117,6 +133,9 @@ app.post("/api/persons", (req, res) => {
         name: body.name,
         number: body.number
     }
+
+    //Set the global contact as person with the return function
+    contact = getContact(person);
 
     //Set persons as persons with new contact added to it
     persons = persons.concat(person);
