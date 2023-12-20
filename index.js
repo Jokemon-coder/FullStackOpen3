@@ -4,6 +4,7 @@ var morgan = require("morgan");
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static("dist"));
 
 morgan.token("request", function (req, res) { return req.method })
 morgan.token("data", function (req, res) { console.log(res) })
