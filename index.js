@@ -1,21 +1,12 @@
 const express = require("express");
+const cors = require("cors");
 var morgan = require("morgan");
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 morgan.token("request", function (req, res) { return req.method })
 morgan.token("data", function (req, res) { console.log(res) })
-
-/*morgan(function (tokens, req, res) {
-    return [
-      tokens.request(req, res),
-      tokens.url(req, res),
-      tokens.status(req, res),
-      tokens['response-time'](req, res), 'ms',
-      tokens.res(req, res, 'content-length'), '-'
-    ].join(' ')
-  })
-*/
 
 //Create a global contact and a function that returns a chosen parameter.
 let contact;
@@ -67,11 +58,11 @@ app.get("/", (req, res) => {
     res.send("<h1>HELLO</h1>");
 });
 
-app.get("/api/persons", (req, res) => {
+app.get("/api/notes", (req, res) => {
     res.json(persons);
 });
 
-app.get("/api/persons/:id", (req, res) => {
+app.get("/api/notes/:id", (req, res) => {
     //Define the id from request parameters
     const id = Number(req.params.id);
     //Person is found using matching id
@@ -97,7 +88,7 @@ app.get("/info", (req, res) => {
     `)
 })
 
-app.delete("/api/persons/:id", (req, res) => {
+app.delete("/api/notes/:id", (req, res) => {
     //Define the id and remember to make it an actual number and not a string
     const id = Number(req.params.id);
     //Set new persons as filtered where the id does not match the selected contact
@@ -106,7 +97,7 @@ app.delete("/api/persons/:id", (req, res) => {
     res.status(204).end();
 })
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/notes", (req, res) => {
     const body = req.body;
     
     //Give 400 error if name or number contain nothing
@@ -145,7 +136,7 @@ app.post("/api/persons", (req, res) => {
 
 })
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`We're running on ${PORT}`);
 });
