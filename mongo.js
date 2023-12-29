@@ -22,7 +22,7 @@ mongoose.connect(url)
 //Schema for the entry and how it is structured
 const contactSchema = new mongoose.Schema({
   name: String,
-  num: Number
+  number: Number
 })
 
 //Contact as defined by the mongoose schema
@@ -31,7 +31,7 @@ const Contact = mongoose.model('Note', contactSchema)
 //New contact created
 const contact = new Contact({
     name: name,
-    num: number
+    number: number
 })
 
 //If command line argument has just the password and nothing else, show all entries
@@ -46,7 +46,7 @@ if (process.argv.length<4) {
   {
     //Create contact based on the entered data
     contact.save().then(result => {
-        console.log(`Added ${contact.name} ${contact.num} to phonebook`)
+        console.log(`Added ${contact.name} ${contact.number} to phonebook`)
         mongoose.connection.close()
       })
   };

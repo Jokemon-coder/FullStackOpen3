@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const express = require("express");
 const cors = require("cors");
 var morgan = require("morgan");
@@ -8,6 +9,18 @@ app.use(express.static("dist"));
 
 morgan.token("request", function (req, res) { return req.method })
 morgan.token("data", function (req, res) { console.log(res) })
+
+const url = `mongodb+srv://Joel:${}@fullstack3cluster.y7a5wjx.mongodb.net/phoneBook?retryWrites=true&w=majority`;
+
+mongoose.set("strictQuery", false);
+mongoose.connect(url);
+
+const noteSchema = new mongoose.Schema({
+    name: String,
+    number: String
+})
+
+const Note = mongoose.model("Note", noteSchema);
 
 //Create a global contact and a function that returns a chosen parameter.
 let contact;
@@ -59,11 +72,20 @@ app.get("/", (req, res) => {
     res.send("<h1>HELLO</h1>");
 });
 
-app.get("/api/notes", (req, res) => {
-    res.json(persons);
+app.get("/api/notes", (req, res) => { 
+    Note.find({}).then(notes => {
+        res.json(notes);
+    })
 });
 
-app.get("/api/notes/:id", (req, res) => {
+/*app.get("/api/notes"), (req, res) => {
+    Contact.find({}).then(contacts => {
+        console.log(res.json(contacts));
+    })
+    console.log(res); 
+}*/
+
+app.get("/api/persons/:id", (req, res) => {
     //Define the id from request parameters
     const id = Number(req.params.id);
     //Person is found using matching id
@@ -89,7 +111,7 @@ app.get("/info", (req, res) => {
     `)
 })
 
-app.delete("/api/notes/:id", (req, res) => {
+app.delete("/api/persons/:id", (req, res) => {
     //Define the id and remember to make it an actual number and not a string
     const id = Number(req.params.id);
     //Set new persons as filtered where the id does not match the selected contact
@@ -98,7 +120,7 @@ app.delete("/api/notes/:id", (req, res) => {
     res.status(204).end();
 })
 
-app.post("/api/notes", (req, res) => {
+app.post("/api/persons", (req, res) => {
     const body = req.body;
     
     //Give 400 error if name or number contain nothing
