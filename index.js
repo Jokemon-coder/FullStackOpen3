@@ -10,7 +10,9 @@ app.use(express.static("dist"));
 morgan.token("request", function (req, res) { return req.method })
 morgan.token("data", function (req, res) { console.log(res) })
 
-const url = `mongodb+srv://Joel:${}@fullstack3cluster.y7a5wjx.mongodb.net/phoneBook?retryWrites=true&w=majority`;
+const password = "";
+
+const url = `mongodb+srv://Joel:${password}@fullstack3cluster.y7a5wjx.mongodb.net/phoneBook?retryWrites=true&w=majority`;
 
 mongoose.set("strictQuery", false);
 mongoose.connect(url);
@@ -19,6 +21,15 @@ const noteSchema = new mongoose.Schema({
     name: String,
     number: String
 })
+
+noteSchema.set("toJSON", {
+    transform: (document, returned) => {
+      returned.id = returned._id.toString()
+      console.log(returned.id, returned._id, returned.__v);
+      delete returned._id;
+      delete returned.__v;
+    }
+  })
 
 const Note = mongoose.model("Note", noteSchema);
 
@@ -75,6 +86,7 @@ app.get("/", (req, res) => {
 app.get("/api/notes", (req, res) => { 
     Note.find({}).then(notes => {
         res.json(notes);
+        console.log(notes);
     })
 });
 

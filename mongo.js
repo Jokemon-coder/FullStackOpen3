@@ -37,8 +37,10 @@ const contact = new Contact({
 //If command line argument has just the password and nothing else, show all entries
 if (process.argv.length<4) {
     Contact.find({}).then(result => {
+      console.log("Phonebook: ")
         result.forEach(contact => {
-            console.log(contact.name, contact.num);
+            //console.log(contact)
+            console.log(contact.name, contact.number);
         });
         mongoose.connection.close();
     });
