@@ -4,6 +4,7 @@ const Note = require("./models/note")
 const express = require("express");
 const cors = require("cors");
 var morgan = require("morgan");
+const note = require("./models/note");
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -101,37 +102,27 @@ app.get("/api/notes/:id", (req, res) => {
 
     //Find all notes and then define person as the specific note found comparing the request id and id found in notes
     const id = req.params.id;
-    Note.find({}).then(notes => {
-        const person = notes.find(n => n.id === id)
-        //If it's successful respond, otherwise throw 404
-        if(person) {
-            res.json(person);
-            res.on("finish", () => contact=person)
-        }
-        //Else return a 404 status and end
-        else {
+    Note.findById(id).then((note) => {
+        //If person exists, respond. Otherwise send a 404 error
+        if(note) {
+            res.json(note);
+        }else {
             res.status(404).end();
         }
     })
-    //If person exists, respond. Otherwise send a 404 error
-    /*if(person) {
-        res.json(person); 
-        res.on("finish", () => contact=person)
-    }
-    else {
-        res.status(404).end();
-    }*/
 })
 
 app.get("/info", (req, res) => {
     //Get the number of contacts and date
-    const numberOf = persons.length;
-    let date = new Date;
-    //Respond with the number of contacts and current date of when the response was sent
-    res.send(`
+    Note.find({}).then(notes => {
+        let date = new Date;
+        const numberOf = notes.length;
+        //Respond with the number of contacts and current date of when the response was sent
+        res.send(`
     <p>Phonebook has ${numberOf} contacts<p>
     <p>${date}</p>
     `)
+    })
 })
 
 app.delete("/api/persons/:id", (req, res) => {
