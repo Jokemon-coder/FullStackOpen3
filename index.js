@@ -1,4 +1,6 @@
-const mongoose = require("mongoose");
+//const mongoose = require("mongoose");
+require("dotenv").config();
+const Note = require("./models/note")
 const express = require("express");
 const cors = require("cors");
 var morgan = require("morgan");
@@ -10,11 +12,7 @@ app.use(express.static("dist"));
 morgan.token("request", function (req, res) { return req.method })
 morgan.token("data", function (req, res) { console.log(res) })
 
-const password = "";
-
-const url = `mongodb+srv://Joel:${password}@fullstack3cluster.y7a5wjx.mongodb.net/phoneBook?retryWrites=true&w=majority`;
-
-mongoose.set("strictQuery", false);
+/*mongoose.set("strictQuery", false);
 mongoose.connect(url);
 
 const noteSchema = new mongoose.Schema({
@@ -32,6 +30,7 @@ noteSchema.set("toJSON", {
   })
 
 const Note = mongoose.model("Note", noteSchema);
+*/
 
 //Create a global contact and a function that returns a chosen parameter.
 let contact;
@@ -60,7 +59,7 @@ app.use(morgan(function (tokens, req, res) {
   }));
 
 
-let persons = [
+/*let persons = [
     {
         id: 1,
         name: "Jacob Newman",
@@ -76,7 +75,7 @@ let persons = [
         name: "Liisa Suo",
         number: "676767"
       }
-]
+]*/
 
 
 app.get("/", (req, res) => {
@@ -97,19 +96,31 @@ app.get("/api/notes", (req, res) => {
     console.log(res); 
 }*/
 
-app.get("/api/persons/:id", (req, res) => {
-    //Define the id from request parameters
-    const id = Number(req.params.id);
-    //Person is found using matching id
-    const person = persons.find(p => p.id === id)
+app.get("/api/notes/:id", (req, res) => {
+    //const person = persons.find(p => p.id === id)
+
+    //Find all notes and then define person as the specific note found comparing the request id and id found in notes
+    const id = req.params.id;
+    Note.find({}).then(notes => {
+        const person = notes.find(n => n.id === id)
+        //If it's successful respond, otherwise throw 404
+        if(person) {
+            res.json(person);
+            res.on("finish", () => contact=person)
+        }
+        //Else return a 404 status and end
+        else {
+            res.status(404).end();
+        }
+    })
     //If person exists, respond. Otherwise send a 404 error
-    if(person) {
+    /*if(person) {
         res.json(person); 
         res.on("finish", () => contact=person)
     }
     else {
         res.status(404).end();
-    }
+    }*/
 })
 
 app.get("/info", (req, res) => {
@@ -171,7 +182,7 @@ app.post("/api/persons", (req, res) => {
 
 })
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
     console.log(`We're running on ${PORT}`);
 });
