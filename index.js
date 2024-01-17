@@ -13,26 +13,6 @@ app.use(express.static("dist"));
 morgan.token("request", function (req, res) { return req.method })
 morgan.token("data", function (req, res) { console.log(res) })
 
-/*mongoose.set("strictQuery", false);
-mongoose.connect(url);
-
-const noteSchema = new mongoose.Schema({
-    name: String,
-    number: String
-})
-
-noteSchema.set("toJSON", {
-    transform: (document, returned) => {
-      returned.id = returned._id.toString()
-      console.log(returned.id, returned._id, returned.__v);
-      delete returned._id;
-      delete returned.__v;
-    }
-  })
-
-const Note = mongoose.model("Note", noteSchema);
-*/
-
 //Create a global contact and a function that returns a chosen parameter.
 let contact;
 
@@ -58,26 +38,6 @@ app.use(morgan(function (tokens, req, res) {
       
       return response;
   }));
-
-
-/*let persons = [
-    {
-        id: 1,
-        name: "Jacob Newman",
-        number: "123456"
-      },
-      {
-        id: 2,
-        name: "Petri Kallio",
-        number: "808080"
-      },
-      {
-        id: 3,
-        name: "Liisa Suo",
-        number: "676767"
-      }
-]*/
-
 
 app.get("/", (req, res) => {
     res.send("<h1>HELLO</h1>");
@@ -109,6 +69,9 @@ app.get("/api/notes/:id", (req, res) => {
         }else {
             res.status(404).end();
         }
+    }).catch(error => {
+        console.log(error.message);
+        res.status(404).end();
     })
 })
 
@@ -125,16 +88,19 @@ app.get("/info", (req, res) => {
     })
 })
 
-app.delete("/api/persons/:id", (req, res) => {
-    //Define the id and remember to make it an actual number and not a string
-    const id = Number(req.params.id);
-    //Set new persons as filtered where the id does not match the selected contact
-    persons = persons.filter(p => p.id !== id);
+app.delete("/api/notes/:id", (req, res) => {
+    //Define the id request params
+    const id = req.params.id;
+    
+    //Delete the note based on matching id
+    Note.deleteOne({_id: id}).then((deleted) => {
+        console.log(deleted);
+    })
     //Send 204 after deletion
     res.status(204).end();
 })
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/notes", (req, res) => {
     const body = req.body;
     
     //Give 400 error if name or number contain nothing
@@ -146,27 +112,27 @@ app.post("/api/persons", (req, res) => {
     }
 
     //Give 400 if an already existing name is found
-    if(persons.find(person => person.name === body.name))
+    /*if(persons.find(person => person.name === body.name))
     {
         return res.status(400).json({
             error: "Contact already exists"
         })
-    }
+    }*/
 
     //Create a new id that is between the the final id of contacts and 1000
-    const newId = Math.floor(Math.random(persons.length+1) * 1000);
     
-    const person = {
-        id: newId,
+    const person = new Note({
         name: body.name,
         number: body.number
-    }
+    })
+    console.log(person);
+
+    person.save().then((result) => {
+        console.log(person);
+    })
 
     //Set the global contact as person with the return function
     contact = getContact(person);
-
-    //Set persons as persons with new contact added to it
-    persons = persons.concat(person);
 
     //Send response
     res.json(person);
