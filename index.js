@@ -43,11 +43,11 @@ app.get("/", (req, res) => {
     res.send("<h1>HELLO</h1>");
 });
 
-app.get("/api/notes", (req, res) => { 
+app.get("/api/notes", (req, res, next) => { 
     Note.find({}).then(notes => {
         res.json(notes);
         console.log(notes);
-    })
+    }).catch(error => next(error));
 });
 
 /*app.get("/api/notes"), (req, res) => {
@@ -57,7 +57,7 @@ app.get("/api/notes", (req, res) => {
     console.log(res); 
 }*/
 
-app.get("/api/notes/:id", (req, res) => {
+app.get("/api/notes/:id", (req, res, next) => {
     //const person = persons.find(p => p.id === id)
 
     //Find all notes and then define person as the specific note found comparing the request id and id found in notes
@@ -65,14 +65,11 @@ app.get("/api/notes/:id", (req, res) => {
     Note.findById(id).then((note) => {
         //If person exists, respond. Otherwise send a 404 error
         if(note) {
-            res.json(note);
+            res.end(JSON.stringify(note, null, " "))
         }else {
             res.status(404).end();
         }
-    }).catch(error => {
-        console.log(error.message);
-        res.status(404).end();
-    })
+    }).catch(error => next(error));
 })
 
 app.get("/info", (req, res) => {
@@ -109,18 +106,8 @@ app.post("/api/notes", (req, res) => {
         return res.status(400).json({
             error: "Missing information"
         })
-    }
+    }    
 
-    //Give 400 if an already existing name is found
-    /*if(persons.find(person => person.name === body.name))
-    {
-        return res.status(400).json({
-            error: "Contact already exists"
-        })
-    }*/
-
-    //Create a new id that is between the the final id of contacts and 1000
-    
     const person = new Note({
         name: body.name,
         number: body.number
@@ -138,6 +125,37 @@ app.post("/api/notes", (req, res) => {
     res.json(person);
 
 })
+
+app.put("/api/notes/:id", (req, res, next) => {
+    const id = req.params.id;
+    const body = req.body;
+
+    const note = {
+        name: body.name,
+        number: body.number
+    }
+
+    Note.findByIdAndUpdate(id, note, {new: true}).then(updated => {
+        console.log(updated);
+        res.json(updated);
+    }).catch(error => next(error));
+})
+
+const unknownEndpoint = (req, res) => {
+    res.status(404).send({error: "unknown endpoint"});
+  }
+  app.use(unknownEndpoint);
+
+  const wrongId = (req, res) => {
+    res.status(400).send({error: "malformatted id"});
+  }
+  app.use(wrongId)
+
+  const errorHandler = (error, req, res, next) => {
+    console.log(error.message)
+    next(error);
+  }
+  app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
