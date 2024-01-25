@@ -97,16 +97,16 @@ app.delete("/api/notes/:id", (req, res) => {
     res.status(204).end();
 })
 
-app.post("/api/notes", (req, res) => {
+app.post("/api/notes", (req, res, next) => {
     const body = req.body;
     
     //Give 400 error if name or number contain nothing
-    if(!body.name || !body.number)
+    /*if(!body.name || !body.number)
     {
         return res.status(400).json({
             error: "Missing information"
         })
-    }    
+    } */   
 
     const person = new Note({
         name: body.name,
@@ -114,28 +114,21 @@ app.post("/api/notes", (req, res) => {
     })
     console.log(person);
 
+    //Save contact and send response
     person.save().then((result) => {
-        console.log(person);
-    })
+        res.json(person);
+    }).catch(err => next(err))
 
     //Set the global contact as person with the return function
     contact = getContact(person);
-
-    //Send response
-    res.json(person);
 
 })
 
 app.put("/api/notes/:id", (req, res, next) => {
     const id = req.params.id;
-    const body = req.body;
+    const {name, number} = req.body;
 
-    const note = {
-        name: body.name,
-        number: body.number
-    }
-
-    Note.findByIdAndUpdate(id, note, {new: true}).then(updated => {
+    Note.findByIdAndUpdate(id, {name, number}, {new: true, runValidators: true, context: "query"}).then(updated => {
         console.log(updated);
         res.json(updated);
     }).catch(error => next(error));
@@ -153,6 +146,13 @@ const unknownEndpoint = (req, res) => {
 
   const errorHandler = (error, req, res, next) => {
     console.log(error.message)
+    if(error.name === "castError")
+    {
+        res.status(400).send({error: "malformatted id"});
+    }else if(error.name === "validationError")
+    {
+        res.status(400).send({error: error.message});
+    }
     next(error);
   }
   app.use(errorHandler);
