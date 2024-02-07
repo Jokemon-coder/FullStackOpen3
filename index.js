@@ -117,7 +117,7 @@ app.post("/api/notes", (req, res, next) => {
     //Save contact and send response
     person.save().then((result) => {
         res.json(person);
-    }).catch(err => next(err))
+    }).catch(error => next(error)/*error => next(error)*/)
 
     //Set the global contact as person with the return function
     contact = getContact(person);
@@ -143,13 +143,14 @@ const unknownEndpoint = (req, res) => {
     res.status(400).send({error: "malformatted id"});
   }
   app.use(wrongId)
-
+  
   const errorHandler = (error, req, res, next) => {
     console.log(error.message)
     if(error.name === "castError")
     {
         res.status(400).send({error: "malformatted id"});
-    }else if(error.name === "validationError")
+    }
+    else if(error.name === "validationError")
     {
         res.status(400).send({error: error.message});
     }

@@ -20,7 +20,12 @@ const noteSchema = new mongoose.Schema({
     },
     number: {
         type: String,
-        minlength: 10,
+        validate: {
+            validator: function(v) {
+                return /\d{3}-\d{3}-\d{4}/.test(v);
+            },
+            message: props => `${props.value} is not a valid number. Use format 000-000-0000.`
+        },
         required: true
     }
 })
