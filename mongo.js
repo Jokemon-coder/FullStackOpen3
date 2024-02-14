@@ -1,10 +1,12 @@
+//Previously used file for initial testing of mongoDB and mongoose
+
 const mongoose = require('mongoose')
 
 //If the entry in the command line is less than 3, ask to give a password and exit
 if (process.argv.length<3) {
   console.log('Give password');
   process.exit(1);
-};
+}
 
 //Variables taken from the given argument in the command line
 const password = process.argv[2];
@@ -51,4 +53,4 @@ if (process.argv.length<4) {
         console.log(`Added ${contact.name} ${contact.number} to phonebook`)
         mongoose.connection.close()
       })
-  };
+  }

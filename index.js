@@ -90,7 +90,7 @@ app.delete("/api/notes/:id", (req, res) => {
     const id = req.params.id;
     
     //Delete the note based on matching id
-    Note.deleteOne({_id: id}).then((deleted) => {
+    Note.deleteOne({ _id: id }).then((deleted) => {
         console.log(deleted);
     })
     //Send 204 after deletion
@@ -126,21 +126,23 @@ app.post("/api/notes", (req, res, next) => {
 
 app.put("/api/notes/:id", (req, res, next) => {
     const id = req.params.id;
-    const {name, number} = req.body;
+    const { name, number } = req.body;
 
-    Note.findByIdAndUpdate(id, {name, number}, {new: true, runValidators: true, context: "query"}).then(updated => {
+    //Find the specific note with specified id and update it while checking validators
+    Note.findByIdAndUpdate(id, { name, number }, { new: true, runValidators: true, context: "query" }).then(updated => {
         console.log(updated);
         res.json(updated);
     }).catch(error => next(error));
 })
 
+//Handling for different errors down below
 const unknownEndpoint = (req, res) => {
-    res.status(404).send({error: "unknown endpoint"});
+    res.status(404).send({ error: "unknown endpoint" });
   }
   app.use(unknownEndpoint);
 
   const wrongId = (req, res) => {
-    res.status(400).send({error: "malformatted id"});
+    res.status(400).send({ error: "malformatted id" });
   }
   app.use(wrongId)
   
@@ -148,11 +150,11 @@ const unknownEndpoint = (req, res) => {
     console.log(error.message)
     if(error.name === "castError")
     {
-        res.status(400).send({error: "malformatted id"});
+        res.status(400).send({ error: "malformatted id" });
     }
     else if(error.name === "validationError")
     {
-        res.status(400).send({error: error.message});
+        res.status(400).send({ error: error.message });
     }
     next(error);
   }
